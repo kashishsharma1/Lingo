@@ -5,6 +5,9 @@ export default function Home() {
       <p className="text-green-500">
         Hello Lingo!
       </p>
+      <p className="text-blue-500">
+        Test github pull and sync!
+      </p>
     </div>
   )
  
