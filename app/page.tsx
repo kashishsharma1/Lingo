@@ -8,6 +8,9 @@ export default function Home() {
       <p className="text-blue-500">
         Test github pull and sync!
       </p>
+      <p className="text-red-500">
+        Test github push and sync!
+      </p>
     </div>
   )
  
