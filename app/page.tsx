@@ -11,6 +11,9 @@ export default function Home() {
       <p className="text-red-500">
         Test github push and sync!
       </p>
+      <p className="text-yellow-500">
+        Test dev branch!
+      </p>
     </div>
   )
  
