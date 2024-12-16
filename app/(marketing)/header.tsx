@@ -33,7 +33,6 @@ export const Header = () => {
                     </SignedOut>
                 </ClerkLoaded>
             </div>
-            Header
         </header>
 
     );
