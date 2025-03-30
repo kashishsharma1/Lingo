@@ -15,7 +15,7 @@ export const Header = () => {
             <div className="lg:max-w-screen-lg mx-auto flex items-center justify-between h-full">
                 <div className="pt-8 pl-4 pb-7 flex items-center gap-x-3 " style={{borderRadius: '10px'}}>
                     <Image src="/mascot.svg" height={40} width={40} alt="Mascot" className="rounded-md"/>
-                    <h1 className="text-2xl font-extrabold text-purple-600 tracking-wide">LINGO</h1> 
+                    <h1 className="text-2xl font-extrabold text-purple-600 tracking-wide">Lingo</h1> 
                 </div>
                 <ClerkLoading>
                     <Loader className="h-5 w-5 text-muted-foreground animate-spin"/>
