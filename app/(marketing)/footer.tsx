@@ -26,7 +26,7 @@ export const Footer = () => {
                     French
                 </Button>
                 <Button size="lg" variant="ghost" className="w-full">
-                    <Image src="/IT-Italy.svg" alt="Italy" height={32} width={40} className="mr-4 rounded-md"/>
+                    <Image src="/IT-Italy.svg" alt="Italy" height={28} width={30} className="mr-4 rounded-md"/>
                     Italian
                 </Button>
                 <Button size="lg" variant="ghost" className="w-full">

@@ -2,7 +2,13 @@ import { cache } from "react";
 import db from "@/db/drizzle";
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
-import { challengeProgress, challenges, courses, units, userProgress } from "@/db/schema";
+import { 
+    challengeProgress,
+    courses, 
+    lessons,
+    units, 
+    userProgress 
+} from "@/db/schema";
 
 export const getUserProgress = cache(async () => {
     const {userId} = await auth();
@@ -53,7 +59,7 @@ export const getUnits = cache(async () => {
             && challenge.challengeProgress.length > 0
             && challenge.challengeProgress.every((progress) => progress.completed);
            });
-           return { ...lesson, allCompletedChallenges } ;
+           return { ...lesson, completed: allCompletedChallenges } ;
         });
         return { ...unit, lessons: lessonWithCompletedStatus };
     });
@@ -75,4 +81,122 @@ export const getCourseId = cache(async (courseId: number) => {
     });
 
     return data;
+});
+
+export const getCourseProgress = cache( async() => {
+    const {userId} = await auth();
+    const userProgress = await getUserProgress();
+
+    if(!userId || ! userProgress?.activeCourseId){
+        return null;
+    }
+
+    const unitInActiveCourse = await db.query.units.findMany({
+        orderBy: (units, {asc}) => [asc(units.order)],
+        where: eq(units.courseId, userProgress.activeCourseId),
+        with: {
+            lessons: {
+                orderBy: (lessons, {asc}) => [asc(lessons.order)],
+                with: {
+                    unit: true,
+                    challenges: {
+                        with: {
+                            challengeProgress: {
+                                where: eq(challengeProgress.userId, userId),
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    const firstUncompletedLesson = unitInActiveCourse.flatMap((unit) => unit.lessons).find((lesson) => {
+        //TODO: If something doesn not work, check the last if clause
+        return lesson.challenges.some((challenge) => {
+            return !challenge.challengeProgress || challenge.challengeProgress.length === 0
+            || challenge.challengeProgress.some((progress) => 
+            progress.completed === false);
+        });
+    });
+
+    return {
+        activeLesson: firstUncompletedLesson,
+        activeLessonId: firstUncompletedLesson?.id,
+    };
+});
+
+export const getLesson = cache(async (id?:string) => {
+    const{ userId } = await auth();
+
+    if(!userId){
+        return null;
+    }
+
+    const courseProgress = await getCourseProgress();
+const rawLessonId = id || courseProgress?.activeLessonId; // This is string | number | undefined
+    
+    if(!rawLessonId){ // Check against the string version
+        return null;
+    }
+
+    // Ensure rawLessonId is a string before passing to parseInt
+    const lessonIdToParse = typeof rawLessonId === 'number' ? rawLessonId.toString() : rawLessonId;
+    const lessonId = parseInt(lessonIdToParse); // Now lessonIdToParse is guaranteed string
+    // Add a check to ensure parsing was successful, if lessonId can be invalid
+    if (isNaN(lessonId)) {
+        console.error("Invalid lessonId provided or derived:", rawLessonId);
+        return null;
+    }
+
+    const data = await db.query.lessons.findFirst({
+        where: eq(lessons.id, lessonId),
+        with: {
+            challenges: {
+                orderBy: (challenges, {asc}) => [asc(challenges.order)],
+                with: {
+                    challengeOptions: true,
+                    challengeProgress: {
+                        where: eq(challengeProgress.userId, userId),
+                    },
+                },
+            },
+        },
+    });
+
+    if(!data || !data.challenges){
+        return null;
+    }
+
+    const normalizedChallenges = data.challenges.map((challenge) => {
+         //TODO: If something doesn not work, check the last if clause
+        const completed = challenge.challengeProgress 
+        && challenge.challengeProgress.length > 0
+        && challenge.challengeProgress.every((progress) => progress.completed);
+        return {...challenge, completed};
+    });
+
+    return {...data, challenges: normalizedChallenges}
+
+});
+
+export const getLessonPercentage = cache(async () => {
+    const courseProgress = await getCourseProgress();
+
+    if(!courseProgress?.activeLessonId){
+        return 0;
+    }
+
+    const lesson = await getLesson(courseProgress.activeLessonId.toString());
+
+    if(!lesson){
+        return 0;
+    }
+
+    const completedChallenges = lesson.challenges.filter((challenge) => challenge.completed);
+    const percentage = Math.round(
+        (completedChallenges.length / lesson.challenges.length) * 100,
+    );
+
+    return percentage;
 });
