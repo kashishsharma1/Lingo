@@ -5,6 +5,7 @@ import { Header } from "./header";
 import { USerProgress } from "@/components/user-progress";
 import { title } from "process";
 import { redirect } from "next/navigation";
+import { Unit } from "./unit";
 
 const LearnPage = async () => {
     const unitsData = await getUnits();
@@ -37,7 +38,15 @@ const LearnPage = async () => {
                 {
                     units.map((unit) => (
                         <div key={unit.id} className="mb-10">
-                            {JSON.stringify(unit)}
+                            <Unit
+                               id = {unit.id}
+                               order={unit.order}
+                               description={unit.description}
+                               title={unit.title}
+                               lessons={unit.lessons}
+                               activeLesson={undefined}
+                               activeLessonPercentage={0}
+                            />
                         </div>
                     ))
                 }
