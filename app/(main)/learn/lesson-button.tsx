@@ -134,16 +134,16 @@ export const LessonButton = ({
                         variant={locked ? "locked" : "default"}
                         className={cn(
                             "h-[70px] w-[70px] border-b-8",
-                            isCompleted && "bg-emerald-500 hover:bg-emerald-600 border-emerald-700",
+                            isCompleted &&  "bg-green-500 hover:bg-green-600 border-green-700",
                             current && "bg-green-500 hover:bg-green-600 border-green-700",
                             !isCompleted && !current && "bg-gray-200 border-gray-300 text-gray-400"
                         )}
                     >
                         <Icon
                             className={cn(
-                                "h-10 w-10",
-                                locked ? "fill-neutral-400 text-neutral-400 stroke-neutral-400" : "fill-white text-white",
-                                isCompleted && "stroke-white stroke-[4]"
+                                "h-10 w-10 fill-neutral-100",
+                                locked ? "fill-neutral-400 text-neutral-400 stroke-neutral-400" :  "text-white",
+                                isCompleted && "stroke-white stroke-[4] fill-none"
                             )}
                         />
                     </Button>

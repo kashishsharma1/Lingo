@@ -10,9 +10,9 @@ type Props ={
     lessons: (typeof lessons.$inferSelect & {
         completed: boolean;
     })[];
-    activeLesson: typeof lessons.$inferSelect & {
+    activeLesson: (typeof lessons.$inferSelect & {
         unit: typeof units.$inferSelect;
-    } | undefined;
+    }) | undefined;
     activeLessonPercentage: number;
 };
 
@@ -34,6 +34,10 @@ export const Unit = ({
                     const isCurrent = lesson.id === activeLesson?.id;
                     const isLocked = !lesson.completed && !isCurrent;
 
+                    const percentage = isCurrent 
+                        ? activeLessonPercentage 
+                        : lesson.completed ? 100 : 0;
+
                     return (
                         <LessonButton
                             key={lesson.id}
@@ -42,7 +46,7 @@ export const Unit = ({
                             totalCount={lessons.length - 1}
                             current={isCurrent}
                             locked={isLocked}
-                            percentage={activeLessonPercentage}
+                            percentage={percentage}
                         />
                     )
 
