@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { CircularProgress } from "@mui/material"; // Import directly for server-side fallback
+import { CircularProgress } from "@mui/material";// Import directly for server-side fallback
 
 type Props = {
     id: number;
@@ -48,7 +48,8 @@ export const LessonButton = ({
     const rightPosition = indentationLevel * 40;
     const isFirst = index === 0;
     const isLast = index === totalCount;
-    const isCompleted = !current && !locked;
+    const isFullyCompleted = percentage === 100 && !current;
+    const isCompleted = locked ? false : isFullyCompleted;
     const Icon = isCompleted ? Check : (isLast ? Crown : Star);
     const href = isCompleted ? `/lesson/${id}` : "/lesson";
 
@@ -120,7 +121,7 @@ export const LessonButton = ({
                     // Default fallback or "Something" for server rendering or non-current state
                     <div>
 
-                        Something
+                       
 
                     </div>
 
