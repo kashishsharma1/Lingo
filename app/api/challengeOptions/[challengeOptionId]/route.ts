@@ -9,17 +9,26 @@ export const GET = async (
     {params}: {params: {challengeOptionsId: number}},
 ) => {
 
-    const isAdmin = await getIsAdmin();
+    try {
+        const isAdmin = await getIsAdmin();
+        if (!isAdmin) {
+            return new NextResponse("Unauthorized", { status: 403 });
+        }
 
-    if(!isAdmin){
-        return new NextResponse("Unauthorized",{ status: 403 });
+        const data = await db.query.challengeOptions.findFirst({
+            where: eq(challengeOptions.id, params.challengeOptionsId),
+        });
+
+        if (!data) {
+             return new NextResponse("Not Found", { status: 404 });
+        }
+
+        return NextResponse.json(data);
+    } catch (error) {
+        console.error("API_ERROR: Failed to get challenge option.", error);
+        return new NextResponse("Internal Server Error", { status: 500 });
     }
-    
-    const data = await db.query.challengeOptions.findFirst({
-        where: eq(challengeOptions.id, params.challengeOptionsId),
-    });
 
-    return NextResponse.json(data);
 };
 
 export const PUT = async (
@@ -27,19 +36,35 @@ export const PUT = async (
     {params}: {params: {challengeOptionsId: number}},
 ) => {
 
-    const isAdmin = await getIsAdmin();
+    try {
+        const isAdmin = await getIsAdmin();
+        if (!isAdmin) {
+            return new NextResponse("Unauthorized", { status: 403 });
+        }
 
-    if(!isAdmin){
-        return new NextResponse("Unauthorized",{ status: 403 });
+        const body = await req.json();
+        
+        const data = await db.update(challengeOptions).set({
+            text: body.text,
+            correct: body.correct,
+            challengeId: body.challengeId,
+            imageSrc: body.imageSrc,
+            audioSrc: body.audioSrc,
+        })
+        .where(eq(challengeOptions.id, params.challengeOptionsId))
+        .returning();
+
+        if (data.length === 0 || !data[0]) {
+            return new NextResponse("Not Found", { status: 404 });
+        }
+
+        return NextResponse.json(data[0]);
+
+    } catch (error) {
+        console.error("API_ERROR: Failed to update challenge option.", error);
+        return new NextResponse("Internal Server Error", { status: 500 });
     }
 
-    const body = await req.json();
-    const data = await db.update(challengeOptions).set({
-        ...body,
-    }).where(eq(challengeOptions.id, params.challengeOptionsId)).returning();
-;
-
-    return NextResponse.json(data[0]);
 };
 
 
@@ -47,14 +72,25 @@ export const DELETE = async (
     req: Request,
     {params}: {params: {challengeOptionsId: number}},
 ) => {
+try {
+        const isAdmin = await getIsAdmin();
+        if (!isAdmin) {
+            return new NextResponse("Unauthorized", { status: 403 });
+        }
 
-    const isAdmin = await getIsAdmin();
 
-    if(!isAdmin){
-        return new NextResponse("Unauthorized",{ status: 403 });
+        const data = await db.delete(challengeOptions)
+            .where(eq(challengeOptions.id,params.challengeOptionsId))
+            .returning();
+
+        if (data.length === 0 || !data[0]) {
+            return new NextResponse("Not Found", { status: 404 });
+        }
+
+        return NextResponse.json(data[0]);
+
+    } catch (error) {
+        console.error("API_ERROR: Failed to delete challenge option.", error);
+        return new NextResponse("Internal Server Error", { status: 500 });
     }
-
-    const data = await db.delete(challengeOptions).where(eq(challengeOptions.id, params.challengeOptionsId)).returning();
-
-    return NextResponse.json(data[0]);
 };
